@@ -2,6 +2,7 @@
 use interpolation::lerp;
 
 use crate::{
+    image_backend::BackendTexture,
     math::{multiply, orient, translate, Matrix2d, Scalar, Vec2d},
     radians::Radians,
     types::{Line, Polygon, Polygons, Radius, Rectangle, Resolution, SourceRectangle},
@@ -641,19 +642,10 @@ pub fn rect_border_tri_list_xy(
 }
 
 /// Creates triangle list texture coords from image.
+///
+/// This goes through the [`BackendTexture`] adapter layer, so textures
+/// migrated to the new image backend produce identical coordinates.
 #[inline(always)]
 pub fn rect_tri_list_uv<I: ImageSize>(image: &I, source_rect: SourceRectangle) -> [[f32; 2]; 6] {
-    let (w, h) = image.get_size();
-    let (src_x, src_y, src_w, src_h) = (
-        source_rect[0],
-        source_rect[1],
-        source_rect[2],
-        source_rect[3],
-    );
-
-    let x1 = src_x as f32 / w as f32;
-    let y1 = src_y as f32 / h as f32;
-    let x2 = (src_w + src_x) as f32 / w as f32;
-    let y2 = (src_h + src_y) as f32 / h as f32;
-    [[x1, y1], [x2, y1], [x1, y2], [x2, y1], [x2, y2], [x1, y2]]
+    image.uv(source_rect)
 }
